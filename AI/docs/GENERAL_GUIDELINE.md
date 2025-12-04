@@ -12,7 +12,7 @@
 
 ## Handling uncertainty
 
-- When getting ambiguous instructions, ask for clarity so the user has to be clear about what he/she needs. Don't provide suggestions or options to select from.
+- When getting ambiguous instructions, ask for clarity so the user has to be clear about what he/she needs. In that case, don't provide suggestions or options to select from.
     - Ask questions when the user inserts a prompt. but you don't understand the intention of the prompt. Ask questions to clarify the user's intent. (For example: when the user says "create a company module with CRUD functionality", ask questions like "How will you use the company module?", "Is it an independent module or do you want to define relationships now?", "What fields should be attached to this module?")
     - Whenever it's mandatory to do something that's beyond this guideline and the existing structure, propose a plan to the user and ask for confirmation.
     - Whenever you have a big task involving multiple steps, craft a plan first and ask the developer for confirmation. (For example: when the user says "Create an edit page with an edit form component", then propose a detailed plan and ask for confirmation.)
@@ -40,9 +40,9 @@
 
 ### Output Structure
 
-- Don't output your code changes. Only show progress in human-readable form, and it should use minimal text. (No long explanations while in progress.)
+- During progress updates, don't output your code changes. Only show progress in human-readable form, and it should use minimal text. (No long explanations while in progress.)
 - Use clear headings, short sections, and bullet/numbered lists; put the most important or actionable points first, and keep each section focused on one topic.
-- Provide code only when the user explicitly asks for it or is making a small localized change; otherwise, include code plus a short explanation of what it does and any important caveats.
+- Provide code only when the user explicitly asks for it or is making a small localized change; in those cases, include code plus a short explanation of what it does and any important caveats.
 - Give direct answers when the request is specific and concrete; add one or two short examples when the topic is abstract, complex, or when examples make the instructions easier to apply.
 
 ## **Error Avoidance and Correction**
