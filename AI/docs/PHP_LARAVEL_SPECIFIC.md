@@ -1,44 +1,43 @@
 # Laravel Specifics
 
-Based on industry standards + Spatie PHP & Laravel AI Guidelines.
+Based on industry standards and Spatie PHP & Laravel AI Guidelines.
 
 ## General PHP Practices
 
-- Classes are small, focused, and single-responsibility.
-- PSR‑12 formatting (use `./vendor/bin/pint`).
+- Classes are small, focused, and single responsibility.
+- PSR-12 formatting (use `./vendor/bin/pint`).
 - Use meaningful names; avoid abbreviations.
 
 ## Laravel Practices
 
-1. After Post action.  default route will be `redirect()->back()` with flash message unless specified.
-2. Don’t create big one function.  use small private functions to support main function.
-3. Always write Human readable code.
-4. use Laravel standard methods over shortcuts.
-5. use Eloquent methods over raw DB Query.
-6. don’t use localization unless it’s not specified in Project Guideline.
+1. After a POST action, the default route should be `redirect()->back()` with a flash message unless otherwise specified.
+2. Don't create large single functions; use small private functions to support the main function.
+3. Always write human-readable code.
+4. Use Laravel's standard methods over shortcuts.
+5. Use Eloquent methods over raw DB queries.
+6. Don't use localization unless it is specified in the project guidelines.
 
-## Module wise Guideline
+## Module-wise Guidelines
 
 ### Controllers
 
 - **Practices**:
-    - Take standard name for define function:
-        - `index` for listing objects
-        - `create`  and `edit` to show creation form (mostly included with index)
-            - rarely used(Only for big Forms)
-        - `store` to create
-        - `update` for update
-        - `single` for view single object
-        - `destroy` to delete object
-    - Break down big functions to use same class’s private functions.
-        - Private function should very specific. which only take input and return output
-        - Don’t handle request inside private function
+    - Use standard names to define functions:
+        - `index` for listing objects.
+        - `create` and `edit` to show the creation/edit form (mostly included with `index()` or `single()` rarely used, only for large forms).
+        - `store` to create.
+        - `update` to update.
+        - `single` to view a single object.
+        - `destroy` to delete an object.
+    - Break down large functions by using the same class's private functions.
+        - Private functions should be very specific; they should only take input and return output.
+        - Don't handle the request inside private functions.
 - **Responsibilities**:
     - Receive the HTTP request.
     - Delegate validation to a **FormRequest**.
     - Delegate authorization to **Policies/Gates**.
-    - Delegate domain only logic to a **Service**.
-    - CRUD with Model
+    - Delegate domain-only logic to a **Service**.
+    - Perform CRUD with the model.
     - Return an **Inertia** response or redirect.
 - **What should NOT be here**:
     - Heavy business logic.
@@ -48,7 +47,7 @@ Based on industry standards + Spatie PHP & Laravel AI Guidelines.
 
 - **Purpose**: Central place for HTTP validation and per-request authorization.
 - **Rules**:
-    - One FormRequest per intent: e.g. `StoreContactRequest`, `UpdateContactRequest`.
+    - One FormRequest per intent, e.g., `StoreContactRequest`, `UpdateContactRequest`.
     - Use it for validation rules, messages, and simple authorization checks.
     - Keep them focused on validation, not business logic.
 
@@ -56,9 +55,9 @@ Based on industry standards + Spatie PHP & Laravel AI Guidelines.
 
 - **Purpose**: Eloquent models representing domain entities.
 - **Best Practices**:
-    - When any attribute is default. define here instead of database.
+    - When any attribute has a default value, define it here instead of in the database.
     - Use soft deletes, unless specifically denied.
-    - Use Cast as per general use-case. like: JSON to Array, use of Enums, dates, bool or float
+    - Use casts according to general use cases, like JSON to array, enums, dates, bool, or float.
 - **Allowed**:
     - Relationships.
     - Attribute casts.
@@ -69,8 +68,8 @@ Based on industry standards + Spatie PHP & Laravel AI Guidelines.
 
 - **Purpose**: Cross-cutting concerns for HTTP requests.
 - **Typical responsibilities**:
-    - ID decoding (e.g. `DecodeHashIds`).
-    - Inertia shared props (e.g. `HandleInertiaRequests`).
+    - ID decoding (e.g., `DecodeHashIds`).
+    - Inertia shared props (e.g., `HandleInertiaRequests`).
 - **Rules**:
     - Must be stateless and fast.
     - Do not put business logic here.
@@ -79,7 +78,7 @@ Based on industry standards + Spatie PHP & Laravel AI Guidelines.
 
 - **Purpose**: Home of business/domain logic.
 - **Rules**:
-    - When something is served multiple module. You can create service for that.
+    - When something is shared across multiple modules, you can create a service for that.
     - Each service should focus on a domain or workflow (e.g., `TransactionService`, `ContactService`).
 - **Examples**:
     - `TransactionService.php` – create/update transactions along with line items.
@@ -87,10 +86,10 @@ Based on industry standards + Spatie PHP & Laravel AI Guidelines.
 
 ### Enums
 
-- **Purpose**: Backed enums for values stored in DB or heavily reused.
-- located in `app/Enums/`
+- **Purpose**: Backed enums for values stored in the DB or heavily reused.
+- Located in `app/Enums/`.
 - **Rules**:
-    - Don’t use enum in database. instead create Enum in Laravel.
+    - Don't use enums in the database; instead, create enums in Laravel.
     - Create enums for values that are persisted, compared, or rendered often (status, type, segment, currency).
     - Place them under `app/Enums` (use nested folders by domain). Cast them on models via `$casts`.
 - **Examples**:
@@ -101,15 +100,16 @@ Based on industry standards + Spatie PHP & Laravel AI Guidelines.
 ### Traits
 
 - **Purpose**: Shared behavior to be reused in multiple classes.
-- Located in `app/Traits`
+- Located in `app/Traits`.
 - **Examples**:
     - `FileUploadTrait.php`
     - `LocalIdHelperTrait.php`
 
-### Migration/Factory & Database design
+### Migrations/Factories & Database Design
 
-- Don’t use enum in database. instead use `/app/Enums/` to define enum and cast in Model
-- Don’t use cascade and constrains in database. use Laravel Model to define relations
-- Use index wherever appropriate
-- use Soft-Delete wherever possible.
-- Don’t set default value while creating migration.  use Model to define `$attributes`
+- Don't use enums in the database; instead, use `/app/Enums/` to define enums and cast them in the model.
+- Don't use cascade and constraints in the database; use Laravel models to define relations.
+- Use indexes wherever appropriate.
+- Use soft deletes wherever possible.
+- Don't set default values in migrations; use the model to define `$attributes`.
+
