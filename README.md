@@ -1,0 +1,1 @@
+This is central repo to provide All guidelines.
