@@ -55,16 +55,7 @@
 - **Accessibility**: No need to introduce accessibility features unless specified by the project guideline. Keep elements/components clean and avoid unnecessary attributes.
 - While creating a UI component, make it nestable if necessary. Example:
 
-```jsx
-<Card>
-  <CardHeader>
-    <CardTitle>Title</CardTitle>
-  </CardHeader>
-  <CardContent>
-    Something
-  </CardContent>
-</Card>
-```
+`<Card>  <CardHeader>    <CardTitle>Title</CardTitle>  </CardHeader>  <CardContent>    Something  </CardContent></Card>`
 
 ### **Reusability Mindset**
 
