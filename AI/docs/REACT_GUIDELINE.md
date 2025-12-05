@@ -1,161 +1,369 @@
-# React Specifics
+# React Implementation Guidelines (AGENT Spec)
 
-### Directory Structure
+Framework-specific rules for how the AI coding agent must structure and write React + TypeScript code under `resources/js`.
 
-1. All React code will be here: `resources/js/`.
-2. **Components**
-    1. `components/ui/` - For library-specific components, like shadcn/ui.
-    2. `components/shared/` - For project-specific general UI components.
-        1. Example: `delete-confirmation.tsx`, `phone-input.tsx`.
-    3. `components/specific/` - For more feature-specific components, like:
-        1. Example: `team-members-list.tsx`.
-    4. `components/` - To provide shared widgets, etc.
-        1. Example: `notification-toast.tsx`.
-3. **Layouts**
-    1. `layout/` - Layouts/shells for our pages.
-        1. Example: `auth-layout.tsx` or `UserLayout`.
-    2. `layout/partials` - Sections used inside layouts.
-        1. Example: `side-bar.tsx`, `header.tsx`, or `user-menu.tsx`.
-4. **Hooks**
-    1. `hooks/` - Holds all custom React hooks.
-        1. Example: `useIsMobile`, `use-appearance`, `use-debounce`.
-5. **Pages**
-    1. `pages/{module-name}/` - To accommodate page components that will be called by Laravel controllers.
-    2. `pages/{module-name}/sections/` - To hold sections from the page.
-    3. `pages/{module-name}/partials/` - To hold small slave components that can be used inside that module.
-6. **Types**
-    1. `types/` - Holds most of the data types that are used across the project or supplied via Laravel APIs.
-    2. `types/api.interface.ts` - This file holds all data types that can be provided by Laravel APIs.
-    3. `types/general.enum.ts` - This file provides all enums that can be used as options or possible values from APIs.
-7. **Utilities**
-    1. `utils/` - The most important folder. It holds all common/generalised functions that provide various facilities to the project. It holds multiple files. For example:
-        1. `number.enums.ts` - Provides all kinds of number and currency transformations and other functions.
-        2. `date.enums.ts` - Provides all date-related functions.
-8. **i18n**
-    1. Provides translations if the project supports it.
+These build on the global behaviour guidelines and Laravel/Inertia integration.
 
-### **UI Standards**
+---
 
-*(UI guidelines remain in the project guideline; only standards stay here.)*
+## 1. Technology & Coding Standards
 
-- Use TailwindCSS.
-- Use shared or specific components to avoid duplication.
-- Use shadcn/ui components where possible to maintain design consistency.
-- Style with Tailwind; prefer existing `components/ui/*` and `theme-components/*` before creating new primitives.
-- **Responsiveness**:
-    - UI must fit screens down to 360px width and larger.
-    - Use standard Tailwind breakpoints to manage UI layout.
-    - To switch components, use the `useIsMobile` hook to check if the device is mobile or not. Don't hide/show only by CSS.
-    - Set heights to accommodate the mobile keyboard (for example, use `dvh` instead of `vh`).
-- While designing a new block or page, use the library specified in the project guideline or components inside `/components/*/**` to create them. Don't apply custom styling unless specifically told by the user.
-- **Actions** (click, tabbing, navigation) should respond immediately or give the user a sense of action (for example, a spinner on form submission).
-    - This does not mean you should include unnecessary animations.
-- **Consistency**: Maintain consistent spacing, typography, and icon sets.
-    - Icons: Prefer `lucide-react`; fall back to `react-icons` when missing.
-- **Accessibility**: No need to introduce accessibility features unless specified by the project guideline. Keep elements/components clean and avoid unnecessary attributes.
-- While creating a UI component, make it nestable if necessary. Example:
+When writing React code:
 
-`<Card>  <CardHeader>    <CardTitle>Title</CardTitle>  </CardHeader>  <CardContent>    Something  </CardContent></Card>`
+- Use **TypeScript** only (`.tsx` / `.ts`).
+- Use **functional components + hooks**; do not use class components.
+- Keep components **small and focused**:
+  - Extract subcomponents into `/sections/*` or `/widgets/*` as soon as they grow.
+  - Avoid deep JSX nesting; prefer early returns and small helpers.
+- Keep code **readable, reusable, and predictable**:
+  - Prefer clear naming over short naming.
+  - Avoid clever but confusing patterns.
+- Avoid duplicate logic:
+  - Extract shared logic into **helpers**, **hooks**, or **utils**.
+- Avoid unnecessary renders:
+  - Use `React.memo`, `useMemo`, and `useCallback` **only when needed** and with a clear performance reason.
+- Follow project **Prettier** and **ESLint** configurations for formatting and lint rules.
 
-### **Reusability Mindset**
+### 1.1 Naming Conventions
 
-1. Promote reusability: move cross-module elements into `components/specifics/*`.
-2. For small UI components, use the `components/shared/` folder to define components.
-3. While working on a component, if you need to create a hook that can be used project-wide, define it inside the `hooks/` folder.
-4. If you ever need to define a function that can be used in other areas as well, define it inside the `utils/` folder.
-5. For utility functions that can be used across multiple features, put them in the `utils` folder.
-6. Before defining a function, check everything inside the `/utils/` folder to see if anything is already available for that.
+- **Files (components, hooks, utilities, etc.):** `kebab-case`
+  - `contact-list.tsx`, `user-form.tsx`, `use-debounce.ts`.
+- **React Components:** `PascalCase`
+  - `ContactList`, `UserForm`.
+- **Variables & Functions:** `camelCase`
+  - `totalAmount`, `loadContacts`.
+- **Constants:** `UPPER_SNAKE_CASE`
+  - `MAX_LENGTH`, `API_URL`.
 
-## Coding Standards
+---
 
-- Use **TypeScript** only.
-- Use functional components + hooks.
-- Avoid unnecessary renders: use `React.memo`, `useMemo`, and `useCallback` only when needed.
-- Use meaningful variable and component names.
-- Extract repeated JSX into components.
-- Follow Prettier and ESLint configurations for formatting and lint rules.
-- Keep components small and focused; extract subcomponents into `/sections/*` or `/partials/*`.
-- Avoid deep nesting; prefer early returns and small helpers.
-- Keep code readable, reusable, and predictable.
-- Prefer clear naming over brevity.
-- Keep functions small and focused.
-- Avoid duplicate logic - extract services/helpers.
+## 2. Project Structure & Directory Layout
 
-### Naming Conventions
+All React code lives under: `resources/js/`.
 
-- **Files: kebab-case.** Example: `contact-list.tsx`, `user-form.tsx`.
-- **Components: PascalCase.** Example: `ContactList`, `UserForm`.
-- **Variables & Functions: camelCase.** Example: `totalAmount`, `loadContacts`.
-- **Constants: UPPER_SNAKE_CASE.** Example: `MAX_LENGTH`, `API_URL`.
+Organize code by **domain module**, then by type (pages, sections, widgets), and use shared directories for cross‑module reuse.
 
-## Best Practices (Must Follow)
+### 2.1 Components
 
-- When building pages:
-    - Keep `index.tsx` minimal; compose sections from `/sections/*` and support them with `/partials/`.
-    - Place module-specific components under the module's `partials/` or `components/`.
-    - Keep module-specific helpers in a local `{module-name}-utils.ts` when needed.
-        - Example: `/pages/sale/sale-utils.ts` to support sale utilities.
-- Use `api.interface.ts` for types for API responses. Don't modify this regularly. Update it only when you have a new structure of data coming from backend to frontend.
-    - Keep the structure of data common across multiple features in the root of this file.
-- Use `general.enum.ts` for general enums. Don't modify this regularly. Update it when you have new enums coming from backend to frontend.
-- Always write human-readable and minimal code to get the result.
-    - Avoid over-checking type safety. For example: if a function already validates a parameter, then avoid extra type checks before passing it.
-    - Don't over-convert variables. If something is defined with some type, then it will probably always have the same type of data assigned.
+Base path: `resources/js/components/`
 
-## General Guideline
+- `components/ui/`
+  - Library-specific primitives and wrappers (e.g. shadcn/ui components).
+  - Use these as building blocks for higher-level components.
+- `components/shared/`
+  - Project-level general UI components reusable across modules.
+  - Examples:
+    - `delete-confirmation.tsx`
+    - `phone-input.tsx`
+- `components/specific/`
+  - Feature- or domain-specific components reused in multiple places.
+  - Example:
+    - `team-members-list.tsx`
+- `components/`
+  - Shared widgets/helpers that don’t fit into `ui/`, `shared/`, or `specific/`.
+  - Example:
+    - `notification-toast.tsx`.
 
-1. Use Ziggy or WayFinder helpers (whatever the project uses) for routing. Avoid hardcoded paths.
-2. Navigation: Use Inertia `Link` and router methods for SPA navigation.
-3. Flash & Shared Props: Read `flash.*`, `auth.*`, and `permissions` from Inertia page props.
-4. For conditional class names or merging multiple class names, use `cn` from utils, which uses the `clsx` library and provides a better function.
-5. Prefer Inertia responses over JSON unless you are intentionally building an API endpoint.
-6. **Project Structure:** Organize front-end code by domain module. Group pages and components by feature (for example, `resources/js/pages/{module}/` with sub-folders for `sections/` and `partials/`), and use shared directories for reusable components.
+### 2.2 Layouts
 
-### Libraries
+Base path: `resources/js/layout/`
 
-1. Check installed libraries and use those wherever possible.
-2. Use Lodash functions wherever applicable (especially for math). Install the library if it is not installed.
-3. Use `date-fns` to handle dates.
-4. Prefer pre-installed libraries before installing a new one.
-    - If a library is available to simplify a task, then install it after confirming with the user.
+- `layout/`
+  - Layouts / shells for pages.
+  - Examples:
+    - `auth-layout.tsx`
+    - `UserLayout.tsx`
+- `layout/sections/`
+  - Layout sections used inside layouts.
+  - Examples:
+    - `side-bar.tsx`
+    - `header.tsx`
+- `layout/widgets/`
+  - hold slave small widget component
+  - example:
+    - `user-menu.tsx`
 
-### Form Handling
+### 2.3 Hooks
 
-1. Always destructure `useForm`.
-2. Use an input handler if a field change does more than just set data.
-    1. Example: `handleEmailInput` will set data and validate the email. If it is not valid, then set an error for that field.
-    2. Never use a generic handler that works for more than one field. In that case, use an inline function to set data.
-3. Fields should have basic inline validation. In case of failure, use `setError` to show a message.
-4. Forms should be submitted from a button click instead of regular form submission.
-5. The submission method must check for errors. If errors exist, prevent submission.
-6. While working on a big form (for example: an invoice) with repeated field groups (line items):
-    1. Create a subcomponent for the repeated field.
-    2. Use its own form state to handle setting data (for example: product name, quantity, discount).
-    3. On change of a field, it should call the main component's `onChange` function, which replaces the existing row with the new data.
+Base path: `resources/js/hooks/`
 
-### Component Design Patterns
+- `hooks/`
+  - All **custom React hooks** that are reusable across the project.
+  - Examples:
+    - `use-is-mobile.ts` (or equivalent file for `useIsMobile`)
+    - `use-appearance.ts`
+    - `use-debounce.ts`
 
-1. An ideal component should take the minimum props and do one clear job.
-2. Module components should be:
-    1. **Page components**
-        1. Directly called from Laravel controllers.
-        2. Have minimal functionality; mostly provide the structure and call the sections.
-    2. **Section components**
-        1. These are master components that hold most of the business logic.
-        2. If a section is bigger, it may call other sections to divide logic.
-        3. For smaller and repeatable parts, it should call partials or UI components.
-    3. **Partials or UI components**
-        1. These are slave components.
-        2. They have minimal logic that supports props manipulation and processing before calling prop methods.
+### 2.4 Pages
 
-### Data Mapping
+Base path: `resources/js/pages/`
 
-- Shared props are provided by `HandleInertiaRequests` (`auth`, `companies`, `permissions`, `notifications`, `flash`).
-- Pages receive only what they need - map with API resources.
+- `pages/{module-name}/`
+  - Page components called by Laravel controllers (Inertia pages).
+  - Example:
+    - `pages/sale/index.tsx`
+- `pages/{module-name}/sections/`
+  - Section components for that module (larger logical pieces of the page).
+- `pages/{module-name}/widgets/`
+  - Small, module-level components used **only** inside that module.
 
-## **Output Validation Before Responding**
+For module-specific helpers:
 
-- Always run a TypeScript check before finalizing.
+- Use a local `{module-name}-utils.ts` inside the module:
+  - Example: `/pages/sale/sale-utils.ts`.
+
+### 2.5 Types
+
+Base path: `resources/js/types/`
+
+- `types/`
+  - Common data types used across the project or supplied via APIs.
+- `types/api.interface.ts`
+  - All types that represent data returned from Laravel APIs.
+  - Treat this as a **central contract file**:
+    - Do not modify frequently.
+    - Only update when the backend data structure changes.
+    - Keep shared structures at the root of this file.
+- `types/general.enum.ts`
+  - General enums used as options or values from APIs.
+  - Update only when new enums are introduced from backend to frontend.
+- Naming
+  - use `Props` while defining props for component.
+  - use `{Module}Fillable` while defining form field’s type
+
+### 2.6 Utilities
+
+Base path: `resources/js/utils/`
+
+- `utils/`
+  - Shared utility functions used by multiple modules.
+  - Before creating a new helper, **check this folder first**.
+  - Examples:
+    - `number.enums.ts` – number and currency formatting/transformations.
+    - `date.enums.ts` – date-related helpers.
+
+### 2.7 i18n
+
+- `i18n/` (or project-specific path)
+  - Only present / used if the project supports translations.
+  - Follow project guideline when present; otherwise, do not introduce i18n.
+
+---
+
+## 3. UI & Styling Standards
+
+- Use **TailwindCSS** for styling.
+- Prefer existing primitives and patterns before introducing new ones:
+  - Use `components/ui/*` and any `components/shared/*` provided.
+- Use **project defined library** (e.g. shadcn/ui )where possible to maintain design consistency.
+- Do not add custom styling when an existing component or pattern can achieve the result.
+- Take minimalistic approach unless specified.
+- New blocks/pages:
+  - Build them primarily with components from `/components/*/**` and project-specified UI libraries.
+
+### 3.1 Responsiveness & UX
+
+- Design for screens down to **360px width** and larger.
+- Use standard Tailwind breakpoints.
+- For mobile/desktop behaviour:
+  - Use the `useIsMobile` hook when behaviour (not just styling) should differ by device.
+  - Avoid relying purely on CSS hide/show for behaviour changes.
+- Consider mobile keyboard:
+  - Prefer `dvh` over `vh` for heights where relevant.
+- **User feedback**:
+  - Actions (clicks, navigation, tabbing, form submissions) must:
+    - Respond immediately, or
+    - Provide visual feedback (e.g., button loading state/spinner).
+  - Avoid unnecessary or heavy animations.
+
+### 3.2 Consistency & Icons
+
+- Maintain consistent spacing, typography, and icon sets.
+- Icons:
+  - Prefer `lucide-react`.
+  - Fall back to `react-icons` only when needed.
+
+### 3.3 Accessibility
+
+- Do not add extra accessibility features unless the project guidelines require it.
+- Keep markup clean; avoid unnecessary attributes.
+
+### 3.4 Nestable Components
+
+Design components that can be composed, for example:
+
+`<Card><CardHeader><CardTitle>Title</CardTitle></CardHeader><CardContent>Something</CardContent></Card>`
+
+---
+
+## 4. Component Architecture & Reusability
+
+### 4.1 Reusability Mindset
+
+- Move cross-module elements into:
+  - `components/shared/` for generic UI.
+  - `components/specific/` for domain-specific shared components.
+- When designing a component:
+  - If it can be reused in other modules, avoid binding it tightly to a single page’s logic.
+- Hooks:
+  - If a hook can be reused across the project, put it in `hooks/`.
+- Utilities:
+  - If a function can be reused in multiple areas, put it in `utils/`.
+  - Check `/utils/` before creating new helpers.
+
+### 4.2 Component Roles
+
+Module components should follow a clear hierarchy:
+
+1. **Page Components**
+   - Live under: `pages/{module-name}/`.
+   - Directly called from Laravel controllers (Inertia).
+   - Responsibilities:
+     - Provide overall page structure.
+     - Wire up sections, layout, and main data.
+     - Keep logic minimal.
+2. **Section Components**
+   - Live under: `pages/{module-name}/sections/`.
+   - Responsibilities:
+     - Hold most of the module’s business/UI logic.
+     - Coordinate data fetching and state for that part of the page.
+     - May call other section components to split up larger flows.
+3. **Widget Components**
+   - Live under:
+     - `pages/{module-name}/widgets/` for module-local partials, or
+     - `components/*` for app-level components.
+   - Responsibilities:
+     - “Slave” components with minimal logic.
+     - Accept props, handle minor local state, and call prop functions.
+     - Focus on rendering and simple interactions.
+
+### 4.3 Change & Refactoring Rules
+
+- When modifying a component, update all affected files across the project structure (page → sections → widgets/shared). Do not limit updates to a single file.
+- Before modifying a form or component, analyze all usage points in the module/project. Apply the change consistently across all shared flows unless explicitly told otherwise.
+  - e.g. If a form is shared between “create” and “edit”, and the user asks to add a field, add it for both flows unless the user explicitly says otherwise.
+- If a component contains strongly branched logic (e.g., repeated `if (isEdit)` patterns), split the logic into separate components. Select the appropriate component at a higher level instead of branching inside one component.
+
+---
+
+### 4.4 Component Design Principles
+
+- Core Philosophy “**minimum props, maximum flexibility**”
+- When creating or refactoring a component, expose only minimal required props.
+- Prefer composition (children, nested components, callback props) over adding multiple tightly coupled props.
+- Do not pass large objects or full global state; pass only the smallest data subset required.
+
+---
+
+## 5. Forms & State Handling
+
+Primarily for Inertia `useForm` or project-standard form hooks.
+
+1. **Always destructure** `useForm`:
+   - Example: `const { data, setData, errors, setError, processing, reset } = useForm<Fillable>(...);`
+2. Input handlers:
+   - If a field change does more than just `setData`, create a **field-specific handler**:
+     - Example: `handleEmailInput`:
+       - Sets data.
+       - Validates email.
+       - On failure, calls `setError` for that field.
+   - Never use a generic multi-field handler for complex logic; for simple `setData` use inline lambdas.
+3. Validation:
+   - Provide basic inline validation at field level.
+   - On validation failure, use `setError` to show messages.
+4. Submission:
+   - Submit forms via **button click handler**, not bare HTML form submit.
+   - Submission logic must:
+     - Check for errors.
+     - Prevent submission if errors exist.
+5. Complex Forms (e.g., invoices with line items):
+   - Create a **subcomponent** for repeated field groups (e.g. a line item).
+   - Each subcomponent:
+     - Manages its own local form state for fields (product name, quantity, discount, etc.).
+       - Example: `const { data, setData } = useForm<LineItemFillable>(...);`
+     - Calls the parent’s `onChange` with updated row data.
+   - Parent component:
+     - Replaces the relevant row with updated data in the main array/state.
+
+### 5.1 Validation Utilities (Agent)
+
+- Use `utils/validation.utils.ts` as the single source for all validation helpers.
+- Implement validation helpers as pure functions: input → boolean or simple typed result.
+- When a validation rule is reusable, add or update it in `utils/validation.utils.ts` instead of redefining it.
+- Do not duplicate validation logic anywhere else in the codebase.
+
+---
+
+## 6. Routing, Inertia Integration & General Frontend Guidelines
+
+1. **Routing helpers**:
+   - Use **Ziggy** or **WayFinder** (as used by the project) for route generation.
+   - Avoid hardcoded paths.
+2. **Navigation**:
+   - Use Inertia `Link` and Inertia router methods for SPA navigation.
+3. **Shared props**:
+   - Read `flash.*`, `auth.*`, and `permissions` from Inertia page props.
+   - Shared props are provided by `HandleInertiaRequests`:
+     - `auth`, `companies`, `permissions`, `notifications`, `flash`.
+4. **Conditional classes**:
+   - Use `cn` from `utils` for class name merging.
+   - `cn` is powered by `clsx` (or similar) and should be the standard for conditional classes.
+5. **Response types**:
+   - Prefer Inertia responses over JSON from backend when building pages.
+   - JSON responses are only for intentional API endpoints.
+6. **Project structure**:
+   - Organize frontend code by **domain module**:
+     - `resources/js/pages/{module}/` with `sections/` and `widgets/`.
+     - Use shared directories for cross-module components.
+
+---
+
+## 7. Libraries
+
+1. Before adding a new dependency:
+   - Check installed libraries and **reuse** them where possible.
+2. Use **Lodash** functions where applicable (especially for math and collection helpers):
+   - If not installed but clearly beneficial, propose installing it to the user first.
+3. Use **date-fns** for date handling.
+4. Prefer existing/pre-installed libraries before adding new ones.
+5. Only install a new library after confirming with the user.
+
+---
+
+## 8. Data Mapping & Types
+
+- Pages should receive only the data they actually need:
+  - Map data from backend API resources to the page props.
+- Use `types/api.interface.ts`:
+  - As the source of truth for API response types.
+  - Keep common/shared structures at its root.
+- Use `types/general.enum.ts`:
+  - For enums used across features.
+  - Only extend it when new backend enums are introduced.
+
+---
+
+## 9. Output Validation Before Responding
+
+Before finalizing code:
+
+- Ensure **TypeScript** passes type checking.
 - Ensure syntax correctness.
-- Remove redundant code.
+- Remove unused imports and redundant code.
+- Keep the final output **minimal and human-readable**:
+  - No extra type checks when a parameter is already validated.
+  - No unnecessary conversions when the type is stable and controlled.
 
+---
+
+## 10. Agent Behaviour Summary for React
+
+When working on React code, the AI coding agent must:
+
+1. Respect the **directory structure** and keep modules self-contained.
+2. Use **TypeScript, functional components, and hooks** as the default.
+3. Build UIs with **Tailwind**, **shadcn/ui**, and existing components before inventing new primitives.
+4. Keep **page components thin**, with most logic in sections, hooks, services, or utils.
+5. Centralize **types**, **enums**, and **utilities** to avoid duplication.
+6. Integrate correctly with **Inertia**, **Ziggy/WayFinder**, and **shared props**.
+7. Always aim for **readable, reusable, and minimal** React code.
